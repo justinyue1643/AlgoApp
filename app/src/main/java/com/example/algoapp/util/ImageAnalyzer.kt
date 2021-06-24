@@ -1,23 +1,19 @@
 package com.example.algoapp.util
 
 import android.content.Context
+import android.graphics.Point
 import android.util.Log
 import androidx.core.net.toUri
-import com.google.android.gms.tasks.Task
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.Text
 import com.google.mlkit.vision.text.TextRecognition
-import com.google.mlkit.vision.text.TextRecognizerOptions
-import kotlinx.coroutines.coroutineScope
 import java.io.IOException
 
-class ImageAnalyzer(val context: Context, val text: String, val setText: (String) -> Unit) {
+class ImageAnalyzer(val context: Context, val updateTextBlock: (String, Array<Point?>) -> Unit) {
     val recognizer = TextRecognition.getClient()
-    // var text: Text? = null
 
-    fun extractText(filePath: String): Text? {
+    fun extractTextFromFilePath(filePath: String) {
         lateinit var image: InputImage
-        var randoText: Text? = null
 
         try {
             image = InputImage.fromFilePath(context, filePath.toUri())
@@ -26,33 +22,34 @@ class ImageAnalyzer(val context: Context, val text: String, val setText: (String
             Log.d(TAG, e.stackTraceToString())
         }
 
-        val result = recognizer.process(image)
+        recognizer.process(image)
             .addOnSuccessListener { visionText ->
-                // randoText = visionText
-                // text = visionText
                 val ocrText = analyzeText(visionText)
-                setText(ocrText)
 
-
-                Log.d(TAG, "mlkit success: $text")
+                Log.d(TAG, "mlkit success: $ocrText")
             }
             .addOnFailureListener { e ->
                 Log.d(TAG, e.stackTraceToString())
             }
-
-        return randoText
     }
 
-    fun analyzeText(result: Text): String {
+    private fun analyzeText(result: Text): Unit {
         var ret = ""
-        val resultText = result.text
         for (block in result.textBlocks) {
             val blockText = block.text
+            val blockCornerPoints = block.cornerPoints
+            val cornerPointsArray = arrayOf(
+                blockCornerPoints?.get(0),
+                blockCornerPoints?.get(1),
+                blockCornerPoints?.get(2),
+                blockCornerPoints?.get(3),
+            )
+            updateTextBlock(blockText, cornerPointsArray)
+
             ret += "$blockText\n"
         }
-        Log.d(TAG, ret)
 
-        return ret
+        Log.i(TAG,ret)
     }
 
     companion object {

@@ -1,20 +1,15 @@
 package com.example.algoapp.ui.screens.camera
 
+import android.annotation.SuppressLint
 import android.view.ViewGroup
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageAnalysis
-import androidx.camera.core.ImageCapture
-import androidx.camera.core.Preview
+import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Button
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
@@ -24,9 +19,14 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import com.example.algoapp.util.ImageAnalyzer
+import com.google.mlkit.vision.common.InputImage
+import kotlinx.coroutines.launch
+import java.util.concurrent.Executor
 
+@SuppressLint("UnsafeOptInUsageError")
 @Composable
-fun CameraPreview(imageCapture: ImageCapture, modifier: Modifier = Modifier.fillMaxHeight()) {
+fun CameraPreview(imageCapture: ImageCapture, executor: Executor, ocr: ImageAnalyzer) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
@@ -48,21 +48,17 @@ fun CameraPreview(imageCapture: ImageCapture, modifier: Modifier = Modifier.fill
                     .requireLensFacing(CameraSelector.LENS_FACING_BACK)
                     .build()
 
-                val imageAnalysis = ImageAnalysis.Builder()
-                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                    .build()
-
                 cameraProvider.unbindAll()
                 cameraProvider.bindToLifecycle(
                     lifecycleOwner,
                     cameraSelector,
                     preview,
-                    imageCapture
+                    imageCapture,
                 )
             }, executor)
             previewView
         },
-        modifier = modifier
+        modifier = Modifier.fillMaxHeight()
     )
 }
 
