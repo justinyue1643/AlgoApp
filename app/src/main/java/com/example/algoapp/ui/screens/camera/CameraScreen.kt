@@ -11,8 +11,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY
 import androidx.camera.core.ImageCaptureException
-import androidx.camera.core.ImageProxy
-import androidx.camera.core.impl.CaptureBundle
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Button
@@ -30,6 +28,7 @@ import coil.request.Disposable
 import com.example.algoapp.util.ImageAnalyzer
 import com.example.algoapp.util.checkCameraPermissions
 import com.example.algoapp.viewmodels.CameraViewModel
+import com.example.algoapp.viewmodels.CameraViewModelFactory
 import com.google.mlkit.vision.text.Text
 import kotlinx.coroutines.launch
 import java.io.File
@@ -45,13 +44,17 @@ fun CameraScreen(
     // launcher: ManagedActivityResultLauncher<String, Boolean>,
     // permissionStatus: Boolean,
     navHostController: NavHostController,
-    cameraViewModel: CameraViewModel = viewModel(),
+    cameraViewModel: CameraViewModel = viewModel(
+        factory = CameraViewModelFactory(
+            LocalContext.current
+        )
+    ),
 ) {
 
 
     val context = LocalContext.current
 
-    val ocr = ImageAnalyzer(context, cameraViewModel::addTextBlock)
+    // val ocr = ImageAnalyzer(context, cameraViewModel::addTextBlock)
     val executor = ContextCompat.getMainExecutor(context)
     var imageCapture = remember { ImageCapture.Builder()
         .setCaptureMode(CAPTURE_MODE_MAXIMIZE_QUALITY)
@@ -69,9 +72,7 @@ fun CameraScreen(
     }*/
 
     Box(modifier = Modifier.fillMaxSize()) {
-
-
-        CameraPreview(imageCapture, executor, ocr)
+        CameraPreview(imageCapture, executor)
         ShutterButton(
             onClick = {
                 val photoFile = File(outputDir, SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS", Locale.US)
@@ -81,12 +82,9 @@ fun CameraScreen(
                     outputOptions, executor, object: ImageCapture.OnImageSavedCallback {
                         override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
                             Log.d(TAG, "Image has been saved!")
-
-                            scope.launch {
-                                val uri = Uri.fromFile(photoFile)
-                                ocr.extractTextFromFilePath(uri.toString())
-                            }
-                            Log.d(TAG, "This is the extracted map\n${cameraViewModel.textBlockString}")
+                            val uri = Uri.fromFile(photoFile)
+                            cameraViewModel.extractText(uri.toString())
+                            // cameraViewModel.cleanText()
                         }
 
                         override fun onError(exception: ImageCaptureException) {
@@ -101,7 +99,13 @@ fun CameraScreen(
             Modifier.align(Alignment.BottomCenter)
         )
         Button(
-            onClick = {Log.d(TAG, cameraViewModel.textBlockString)}
-        ){Text("Press me")}
+            onClick = {Log.d(CameraViewModel.TAG, cameraViewModel.textBlockString)}
+        ){Text("Check map")}
+    }
+
+    DisposableEffect(true) {
+        onDispose {
+            cameraViewModel.clearState()
+        }
     }
 }

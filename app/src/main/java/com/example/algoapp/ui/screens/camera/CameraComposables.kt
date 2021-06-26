@@ -26,7 +26,7 @@ import java.util.concurrent.Executor
 
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
-fun CameraPreview(imageCapture: ImageCapture, executor: Executor, ocr: ImageAnalyzer) {
+fun CameraPreview(imageCapture: ImageCapture, executor: Executor) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
