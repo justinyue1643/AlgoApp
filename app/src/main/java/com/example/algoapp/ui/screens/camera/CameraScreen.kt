@@ -25,6 +25,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.request.Disposable
+import com.example.algoapp.NavRoutes
 import com.example.algoapp.util.ImageAnalyzer
 import com.example.algoapp.util.checkCameraPermissions
 import com.example.algoapp.viewmodels.CameraViewModel
@@ -46,7 +47,8 @@ fun CameraScreen(
     navHostController: NavHostController,
     cameraViewModel: CameraViewModel = viewModel(
         factory = CameraViewModelFactory(
-            LocalContext.current
+            LocalContext.current,
+            navHostController
         )
     ),
 ) {
@@ -84,7 +86,7 @@ fun CameraScreen(
                             Log.d(TAG, "Image has been saved!")
                             val uri = Uri.fromFile(photoFile)
                             cameraViewModel.extractText(uri.toString())
-                            // cameraViewModel.cleanText()
+
                         }
 
                         override fun onError(exception: ImageCaptureException) {
@@ -95,12 +97,10 @@ fun CameraScreen(
                 photoFile.delete()
                 // cameraViewModel.cleanText()
                 // cameraViewModel.clearTextBlocks()
+                      //navHostController.navigate("Submission")
             },
             Modifier.align(Alignment.BottomCenter)
         )
-        Button(
-            onClick = {Log.d(CameraViewModel.TAG, cameraViewModel.textBlockString)}
-        ){Text("Check map")}
     }
 
     DisposableEffect(true) {

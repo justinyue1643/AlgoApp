@@ -12,11 +12,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import com.example.algoapp.ui.screens.camera.CameraScreen
 import com.example.algoapp.ui.screens.home.HomeScreen
+import com.example.algoapp.ui.screens.submission.SubmissionScreen
 import java.io.File
 
 object NavRoutes {
     const val homeRoute = "Home"
     const val cameraRoute = "Camera"
+    const val submissionRoute = "Submission"
 }
 
 @Composable
@@ -32,6 +34,11 @@ fun NavigationGraph(outputDir: File) {
         composable("${NavRoutes.cameraRoute}/{language}") { backStackEntry ->
             val language = backStackEntry.arguments?.getString("language") ?: ""
             CameraScreen(language, outputDir, /*launcher, permissionStatus,*/ navController)
+        }
+        composable("${NavRoutes.submissionRoute}/{setUpCode}/{runnableCode}") { backStackEntry ->
+            val setUpCode = backStackEntry.arguments?.getString("setUpCode") ?: ""
+            val runnableCode = backStackEntry.arguments?.getString("runnableCode") ?: ""
+            SubmissionScreen(setUpCode, runnableCode)
         }
     }
 }
