@@ -24,13 +24,13 @@ fun PreviewSubmissionScreen() {
         Surface(
             color = Color.White
         ) {
-            SubmissionScreen("", "")
+            SubmissionScreen("","", "", SubmissionViewModel())
         }
     }
 }
 
 @Composable
-fun SubmissionScreen(setup: String, runnable: String, submissionViewModel: SubmissionViewModel = viewModel()) {
+fun SubmissionScreen(language: String, setup: String, runnable: String, submissionViewModel: SubmissionViewModel = viewModel()) {
     var setUpCode by remember { mutableStateOf("${setup}") }
     var runnableCode by remember { mutableStateOf("${runnable}") }
 

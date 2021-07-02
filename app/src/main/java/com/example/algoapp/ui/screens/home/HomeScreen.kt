@@ -6,6 +6,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -14,19 +15,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.algoapp.NavRoutes
+import com.example.algoapp.ui.theme.poppinsFamily
 import com.google.accompanist.coil.rememberCoilPainter
 
 sealed class Language(val name: String, val color: Color, val image: Int) {
-    object Python: Language("Python", Color.Blue, com.example.algoapp.R.drawable.python_icon)
-    object Java: Language("Java",  Color.Yellow, com.example.algoapp.R.drawable.java_icon)
+    object Python: Language("Python", Color(0xFF2196F3), com.example.algoapp.R.drawable.python_icon)
+    object Java: Language("Java",  Color(0xFFDBC81A), com.example.algoapp.R.drawable.java_icon)
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun PreviewHomeScreen() {
     val dummyNav = rememberNavController()
@@ -38,7 +43,7 @@ fun HomeScreen(navHostController: NavHostController) {
     val languageList = listOf(Language.Python, Language.Java)
 
     Column(
-        modifier = Modifier.padding(16.dp)
+        modifier = Modifier.fillMaxSize().padding(16.dp)
     ) {
         languageList.forEach { language ->
             LanguageButton(language, navHostController, modifier = Modifier.height(150.dp))
@@ -57,7 +62,12 @@ fun LanguageButton(language: Language, navHostController: NavHostController, mod
         onClick = { navHostController.navigate("${NavRoutes.cameraRoute}/${language.name}" ) },
         modifier = modifier.fillMaxWidth()
     ) {
-        Text(language.name)
+        Text(
+            language.name,
+            style = TextStyle(color = Color.White, fontSize = 20.sp),
+            fontFamily = poppinsFamily,
+            fontWeight = FontWeight.Bold
+        )
         Image(
             painter = rememberCoilPainter(request = language.image),
             contentDescription = "${language.name} icon"

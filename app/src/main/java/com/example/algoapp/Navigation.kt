@@ -35,10 +35,11 @@ fun NavigationGraph(outputDir: File) {
             val language = backStackEntry.arguments?.getString("language") ?: ""
             CameraScreen(language, outputDir, /*launcher, permissionStatus,*/ navController)
         }
-        composable("${NavRoutes.submissionRoute}/{setUpCode}/{runnableCode}") { backStackEntry ->
+        composable("${NavRoutes.submissionRoute}/{language}/{setUpCode}/{runnableCode}") { backStackEntry ->
+            val language = backStackEntry.arguments?.getString("language") ?: ""
             val setUpCode = backStackEntry.arguments?.getString("setUpCode") ?: ""
             val runnableCode = backStackEntry.arguments?.getString("runnableCode") ?: ""
-            SubmissionScreen(setUpCode, runnableCode)
+            SubmissionScreen(language, setUpCode, runnableCode)
         }
     }
 }

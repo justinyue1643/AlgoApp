@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -38,6 +39,14 @@ import java.util.*
 
 const val TAG = "CameraScreen"
 
+@Preview(showBackground = true)
+@Composable
+fun PreviewCameraScreen() {
+    val f = File("")
+    val dummyNav = NavHostController(LocalContext.current)
+    CameraScreen("", f, dummyNav, CameraViewModel("", LocalContext.current, dummyNav))
+}
+
 @Composable
 fun CameraScreen(
     language: String,
@@ -47,21 +56,18 @@ fun CameraScreen(
     navHostController: NavHostController,
     cameraViewModel: CameraViewModel = viewModel(
         factory = CameraViewModelFactory(
+            language,
             LocalContext.current,
             navHostController
         )
     ),
 ) {
 
-
     val context = LocalContext.current
-
-    // val ocr = ImageAnalyzer(context, cameraViewModel::addTextBlock)
     val executor = ContextCompat.getMainExecutor(context)
     var imageCapture = remember { ImageCapture.Builder()
         .setCaptureMode(CAPTURE_MODE_MAXIMIZE_QUALITY)
         .build() }
-    val scope = rememberCoroutineScope()
 
     /*LaunchedEffect(permissionStatus) {
         if (permissionStatus != true) {
@@ -86,7 +92,6 @@ fun CameraScreen(
                             Log.d(TAG, "Image has been saved!")
                             val uri = Uri.fromFile(photoFile)
                             cameraViewModel.extractText(uri.toString())
-
                         }
 
                         override fun onError(exception: ImageCaptureException) {
@@ -95,9 +100,6 @@ fun CameraScreen(
                     }
                 )
                 photoFile.delete()
-                // cameraViewModel.cleanText()
-                // cameraViewModel.clearTextBlocks()
-                      //navHostController.navigate("Submission")
             },
             Modifier.align(Alignment.BottomCenter)
         )

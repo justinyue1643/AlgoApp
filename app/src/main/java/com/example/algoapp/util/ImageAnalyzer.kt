@@ -15,7 +15,6 @@ import java.io.IOException
 class ImageAnalyzer(val context: Context) {
     private val recognizer = TextRecognition.getClient()
     var textBlocks = mutableMapOf<String, Array<Point?>>()
-
     val textBlockString
         get() = textBlocks.toString()
 
@@ -72,6 +71,10 @@ class ImageAnalyzer(val context: Context) {
         }
 
         Log.i(TAG,ret)
+    }
+
+    fun clearState() {
+        textBlocks.clear()
     }
 
     companion object {

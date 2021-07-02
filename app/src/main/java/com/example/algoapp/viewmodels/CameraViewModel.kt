@@ -14,7 +14,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import java.lang.IllegalArgumentException
 
-class CameraViewModel(private val context: Context, private val navHostController: NavHostController): ViewModel() {
+class CameraViewModel(private val language: String, private val context: Context, private val navHostController: NavHostController): ViewModel() {
     private val imageAnalyzer = ImageAnalyzer(context)
     var setUpCode = ""
         private set
@@ -42,17 +42,19 @@ class CameraViewModel(private val context: Context, private val navHostControlle
             job.await()
             if (numOfPicturesTaken == 0) {
                 setUpCode = cleanText(imageAnalyzer.textBlocks)
+                imageAnalyzer.clearState()
                 Log.d(TAG, "setup code is ${setUpCode}")
             }
             else {
                 runnableCode = cleanText(imageAnalyzer.textBlocks)
+                imageAnalyzer.clearState()
                 Log.d(TAG, "runnable code is ${runnableCode}")
             }
 
             incrementNumOfPicturesTaken()
             Log.d(TAG, "navRoute: ${NavRoutes.submissionRoute}/${setUpCode}/${runnableCode}")
             if (numOfPicturesTaken == 2) {
-                // navHostController.navigate("${NavRoutes.submissionRoute}/${setUpCode}/${runnableCode}")
+                navHostController.navigate("${NavRoutes.submissionRoute}/${language}/${setUpCode}/${runnableCode}")
             }
         }
 
@@ -102,10 +104,10 @@ class CameraViewModel(private val context: Context, private val navHostControlle
     }
 }
 
-class CameraViewModelFactory(private val context: Context, private val navHostController: NavHostController): ViewModelProvider.Factory {
+class CameraViewModelFactory(private val language: String, private val context: Context, private val navHostController: NavHostController): ViewModelProvider.Factory {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(CameraViewModel::class.java)) {
-            return CameraViewModel(context, navHostController) as T
+            return CameraViewModel(language, context, navHostController) as T
         }
         throw IllegalArgumentException("Unknown ViewModel Class")
     }
