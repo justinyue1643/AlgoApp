@@ -1,18 +1,11 @@
 package com.example.algoapp.ui.screens.home
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
@@ -23,15 +16,16 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.algoapp.NavRoutes
+import com.example.algoapp.R
 import com.example.algoapp.ui.theme.poppinsFamily
 import com.google.accompanist.coil.rememberCoilPainter
 
 sealed class Language(val name: String, val color: Color, val image: Int) {
-    object Python: Language("Python", Color(0xFF2196F3), com.example.algoapp.R.drawable.python_icon)
-    object Java: Language("Java",  Color(0xFFDBC81A), com.example.algoapp.R.drawable.java_icon)
+    object Python: Language("Python", Color(0xFF2196F3), R.drawable.python_icon)
+    object Java: Language("Java",  Color(0xFFDBC81A), R.drawable.java_icon)
 }
 
-@Preview(showBackground = true)
+@Preview()
 @Composable
 fun PreviewHomeScreen() {
     val dummyNav = rememberNavController()

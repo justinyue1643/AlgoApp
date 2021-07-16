@@ -36,6 +36,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.Executor
 
 const val TAG = "CameraScreen"
 
@@ -51,8 +52,6 @@ fun PreviewCameraScreen() {
 fun CameraScreen(
     language: String,
     outputDir: File,
-    // launcher: ManagedActivityResultLauncher<String, Boolean>,
-    // permissionStatus: Boolean,
     navHostController: NavHostController,
     cameraViewModel: CameraViewModel = viewModel(
         factory = CameraViewModelFactory(
@@ -62,47 +61,22 @@ fun CameraScreen(
         )
     ),
 ) {
-
     val context = LocalContext.current
     val executor = ContextCompat.getMainExecutor(context)
     var imageCapture = remember { ImageCapture.Builder()
         .setCaptureMode(CAPTURE_MODE_MAXIMIZE_QUALITY)
-        .build() }
-
-    /*LaunchedEffect(permissionStatus) {
-        if (permissionStatus != true) {
-            launcher.launch(Manifest.permission.CAMERA)
-        }
-
-        if (!checkCameraPermissions(context)) {
-            navHostController.popBackStack()
-        }
-    }*/
+        .build()
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         CameraPreview(imageCapture, executor)
         ShutterButton(
             onClick = {
-                val photoFile = File(outputDir, SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS", Locale.US)
-                    .format(System.currentTimeMillis()) + ".jpg")
-                val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
-                imageCapture.takePicture(
-                    outputOptions, executor, object: ImageCapture.OnImageSavedCallback {
-                        override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                            Log.d(TAG, "Image has been saved!")
-                            val uri = Uri.fromFile(photoFile)
-                            cameraViewModel.extractText(uri.toString())
-                        }
-
-                        override fun onError(exception: ImageCaptureException) {
-                            Log.e(TAG, "Image was not saved: ${exception.stackTraceToString()}")
-                        }
-                    }
-                )
-                photoFile.delete()
+                takePicture(outputDir, imageCapture, executor, cameraViewModel::extractText)
             },
             Modifier.align(Alignment.BottomCenter)
         )
+        yeet(cameraViewModel.status)
     }
 
     DisposableEffect(true) {
@@ -110,4 +84,29 @@ fun CameraScreen(
             cameraViewModel.clearState()
         }
     }
+}
+
+private fun takePicture(outputDir: File, imageCapture: ImageCapture, executor: Executor, action: (String) -> Unit) {
+    val photoFile = File(outputDir, SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS", Locale.US)
+        .format(System.currentTimeMillis()) + ".jpg")
+    val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
+    imageCapture.takePicture(
+        outputOptions, executor, object: ImageCapture.OnImageSavedCallback {
+            override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                Log.d(TAG, "Image has been saved!")
+                val uri = Uri.fromFile(photoFile)
+                action(uri.toString())
+            }
+
+            override fun onError(exception: ImageCaptureException) {
+                Log.e(TAG, "Image was not saved: ${exception.stackTraceToString()}")
+            }
+        }
+    )
+    photoFile.delete()
+}
+
+@Composable
+fun yeet(status: Boolean) {
+    Text(status.toString())
 }

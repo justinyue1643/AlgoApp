@@ -1,10 +1,8 @@
 package com.example.algoapp.util
 
-import android.graphics.Point
 import android.util.Log
-import com.example.algoapp.viewmodels.CameraViewModel
 
-val TAG = "CleaningTextUtils"
+const val TAG = "CleaningTextUtils"
 
 fun cleanPythonCode(textBlocks: Map<String, Array<Pair<Int, Int>>>): String {
     Log.d(TAG, "Pretty Print Points:\n${prettyLogPoints(textBlocks)}")

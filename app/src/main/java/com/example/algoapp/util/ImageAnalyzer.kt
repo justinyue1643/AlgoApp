@@ -4,21 +4,18 @@ import android.content.Context
 import android.graphics.Point
 import android.util.Log
 import androidx.core.net.toUri
-import com.google.android.gms.tasks.Task
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.Text
 import com.google.mlkit.vision.text.TextRecognition
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.io.IOException
 
-class ImageAnalyzer(val context: Context) {
+class ImageAnalyzer(private val context: Context, val status: Boolean, val changeStatus: () -> Unit) {
     private val recognizer = TextRecognition.getClient()
     var textBlocks = mutableMapOf<String, Array<Pair<Int, Int>>>()
     val textBlockString
         get() = textBlocks.toString()
 
-    suspend fun extractTextFromFilePath(filePath: String): Task<Text> {
+    fun extractTextFromFilePath(filePath: String): Unit {
         lateinit var image: InputImage
 
         try {
@@ -31,30 +28,24 @@ class ImageAnalyzer(val context: Context) {
             .addOnSuccessListener { visionText ->
                 analyzeText(visionText)
                 Log.d(TAG, "mlkit success")
+                // changeStatus()
             }
             .addOnFailureListener { e ->
                 Log.d(TAG, e.stackTraceToString())
             }
-
-        withContext(Dispatchers.Default) {
-            while(!process.isComplete) {
-                Log.d(TAG, "process is not finished")
+            .addOnCompleteListener {
+                Log.d(TAG, "process is finished")
+                changeStatus()
             }
-        }
-
-        Log.d(TAG, "process is finished")
-
-        return process
     }
 
     private fun addTextBlock(blockText: String, points: Array<Point?>) {
-        val arrayPairs = Array<Pair<Int, Int>>(4) { i -> Pair(points[i]!!.x, points[i]!!.y) }
+        val arrayPairs = Array(4) { i -> Pair(points[i]!!.x, points[i]!!.y) }
         textBlocks[blockText] = arrayPairs
     }
 
     private fun analyzeText(result: Text): Unit {
         var ret = ""
-        var count = 0
         for (block in result.textBlocks) {
             val blockText = block.text
             val blockCornerPoints = block.cornerPoints
@@ -65,8 +56,6 @@ class ImageAnalyzer(val context: Context) {
                 blockCornerPoints?.get(3),
             )
             addTextBlock(blockText, cornerPointsArray)
-            Log.d(TAG, "analyzeText() $count")
-            count += 1
 
             ret += "$blockText\n"
         }

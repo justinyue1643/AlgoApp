@@ -3,6 +3,9 @@ package com.example.algoapp.viewmodels
 import android.content.Context
 import android.graphics.Point
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -10,19 +13,18 @@ import androidx.navigation.NavHostController
 import com.example.algoapp.NavRoutes
 import com.example.algoapp.util.ImageAnalyzer
 import com.example.algoapp.util.cleanPythonCode
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.lang.IllegalArgumentException
 
 class CameraViewModel(private val language: String, private val context: Context, private val navHostController: NavHostController): ViewModel() {
-    private val imageAnalyzer = ImageAnalyzer(context)
     var setUpCode = ""
         private set
     var runnableCode = ""
         private set
     var numOfPicturesTaken = 0
         private set
+    var status by mutableStateOf(true)
+    private val imageAnalyzer = ImageAnalyzer(context, status) { status = true }
 
     val textBlockString: String
         get() = imageAnalyzer.textBlockString
@@ -34,25 +36,27 @@ class CameraViewModel(private val language: String, private val context: Context
     }
 
     fun extractText(filePath: String): Unit {
-        var status = false
+        status = false
         viewModelScope.launch {
-            val job = viewModelScope.async {
-                imageAnalyzer.extractTextFromFilePath(filePath)
-                status = true
+            imageAnalyzer.extractTextFromFilePath(filePath)
+            withContext(Dispatchers.Default) {
+                while (!status) {
+                    Log.d(TAG, "Task isn't finished")
+                }
             }
-            job.await()
+
             if (numOfPicturesTaken == 0) {
                 setUpCode = cleanPythonCode(imageAnalyzer.textBlocks)
-                imageAnalyzer.clearState()
-                Log.d(TAG, "setup code is ${setUpCode}")
+                Log.d(TAG, "setup code is $setUpCode")
             }
             else {
                 runnableCode = cleanPythonCode(imageAnalyzer.textBlocks)
-                imageAnalyzer.clearState()
-                Log.d(TAG, "runnable code is ${runnableCode}")
+                Log.d(TAG, "runnable code is $runnableCode")
             }
+            imageAnalyzer.clearState()
 
             incrementNumOfPicturesTaken()
+            Log.d(TAG, "num of pics taken: $numOfPicturesTaken")
             Log.d(TAG, "navRoute: ${NavRoutes.submissionRoute}/${setUpCode}/${runnableCode}")
             if (numOfPicturesTaken == 2) {
                 navHostController.navigate("${NavRoutes.submissionRoute}/${language}/${setUpCode}/${runnableCode}")
@@ -62,46 +66,12 @@ class CameraViewModel(private val language: String, private val context: Context
         Log.d(TAG, "extractText() is finished")
     }
 
-    private fun cleanText(textBlocks: MutableMap<String, Array<Point?>>): String {
-        Log.d(TAG, "map looks like this\n${textBlockString}")
-        val firstKey = textBlocks.keys.firstOrNull()
-        var lastPoint = textBlocks.values.firstOrNull()
-        var ret = "${firstKey}\n"
-
-        /*if (firstKey == null && lastPoint == null) {
-            return
-        }*/
-
-        var numOfTabs = 0
-
-        for ((k,v) in textBlocks) {
-            if (k != firstKey) {
-                if (v[0]!!.x > lastPoint?.get(0)!!.x) {
-                    numOfTabs += 1
-                }
-                else {
-                    numOfTabs -= 1
-
-                    if (numOfTabs < 0) {
-                        numOfTabs = 0
-                    }
-                }
-                ret += "\t".repeat(numOfTabs) + "$k\n"
-            }
-        }
-
-        ret.trim()
-        Log.i(TAG, ret)
-
-        return ret
-    }
-
     private fun incrementNumOfPicturesTaken() {
         numOfPicturesTaken += 1
     }
 
     companion object {
-        val TAG = "CameraViewModel"
+        const val TAG = "CameraViewModel"
     }
 }
 
