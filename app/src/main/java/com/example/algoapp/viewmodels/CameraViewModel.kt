@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import com.example.algoapp.NavRoutes
 import com.example.algoapp.util.ImageAnalyzer
+import com.example.algoapp.util.cleanPythonCode
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -41,12 +42,12 @@ class CameraViewModel(private val language: String, private val context: Context
             }
             job.await()
             if (numOfPicturesTaken == 0) {
-                setUpCode = cleanText(imageAnalyzer.textBlocks)
+                setUpCode = cleanPythonCode(imageAnalyzer.textBlocks)
                 imageAnalyzer.clearState()
                 Log.d(TAG, "setup code is ${setUpCode}")
             }
             else {
-                runnableCode = cleanText(imageAnalyzer.textBlocks)
+                runnableCode = cleanPythonCode(imageAnalyzer.textBlocks)
                 imageAnalyzer.clearState()
                 Log.d(TAG, "runnable code is ${runnableCode}")
             }
@@ -75,7 +76,7 @@ class CameraViewModel(private val language: String, private val context: Context
 
         for ((k,v) in textBlocks) {
             if (k != firstKey) {
-                if (v[0]!!.y > lastPoint?.get(0)!!.y) {
+                if (v[0]!!.x > lastPoint?.get(0)!!.x) {
                     numOfTabs += 1
                 }
                 else {

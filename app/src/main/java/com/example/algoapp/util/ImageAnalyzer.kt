@@ -14,7 +14,7 @@ import java.io.IOException
 
 class ImageAnalyzer(val context: Context) {
     private val recognizer = TextRecognition.getClient()
-    var textBlocks = mutableMapOf<String, Array<Point?>>()
+    var textBlocks = mutableMapOf<String, Array<Pair<Int, Int>>>()
     val textBlockString
         get() = textBlocks.toString()
 
@@ -48,7 +48,8 @@ class ImageAnalyzer(val context: Context) {
     }
 
     private fun addTextBlock(blockText: String, points: Array<Point?>) {
-        textBlocks[blockText] = points
+        val arrayPairs = Array<Pair<Int, Int>>(4) { i -> Pair(points[i]!!.x, points[i]!!.y) }
+        textBlocks[blockText] = arrayPairs
     }
 
     private fun analyzeText(result: Text): Unit {
