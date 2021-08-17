@@ -69,3 +69,18 @@ private fun prettyLogArrayPoints(arr: Array<Pair<Int, Int>>): String {
 
     return output
 }
+
+fun cleanPythonCodeRequest(setupCode: String): String {
+    var ret = ""
+
+    for (i in setupCode) {
+        when(i) {
+            '\n' -> { ret += "\\n"}
+            '\t' -> { ret += "\\t"}
+            '\"' -> { ret += "\\\""}
+            else -> { ret += i}
+        }
+    }
+
+    return ret
+}

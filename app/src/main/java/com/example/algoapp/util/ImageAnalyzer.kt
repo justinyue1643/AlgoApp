@@ -24,7 +24,7 @@ class ImageAnalyzer(private val context: Context, val status: Boolean, val chang
             Log.d(TAG, e.stackTraceToString())
         }
 
-        val process = recognizer.process(image)
+        recognizer.process(image)
             .addOnSuccessListener { visionText ->
                 analyzeText(visionText)
                 Log.d(TAG, "mlkit success")

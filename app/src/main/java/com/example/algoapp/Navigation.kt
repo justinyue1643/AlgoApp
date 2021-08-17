@@ -24,16 +24,12 @@ object NavRoutes {
 @Composable
 fun NavigationGraph(outputDir: File) {
     val navController = rememberNavController()
-    var permissionStatus by remember { mutableStateOf(false)}
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-        permissionStatus = isGranted
-    }
 
     NavHost(navController = navController, startDestination = NavRoutes.homeRoute ) {
         composable(NavRoutes.homeRoute) { HomeScreen(navController) }
         composable("${NavRoutes.cameraRoute}/{language}") { backStackEntry ->
             val language = backStackEntry.arguments?.getString("language") ?: ""
-            CameraScreen(language, outputDir, /*launcher, permissionStatus,*/ navController)
+            CameraScreen(language, outputDir, navController)
         }
         composable("${NavRoutes.submissionRoute}/{language}/{setUpCode}/{runnableCode}") { backStackEntry ->
             val language = backStackEntry.arguments?.getString("language") ?: ""

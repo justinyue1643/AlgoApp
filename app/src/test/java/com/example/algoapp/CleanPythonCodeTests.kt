@@ -1,10 +1,11 @@
 package com.example.algoapp
 
 import com.example.algoapp.util.cleanPythonCode
+import com.example.algoapp.util.cleanPythonCodeRequest
 import org.junit.Test
 import org.junit.Assert.*
 
-class CleanCodeTests {
+class CleanPythonCodeTests {
     @Test
     fun testCleanPythonThreeLineBasicExample() {
         val input = mapOf(
@@ -61,6 +62,15 @@ class CleanCodeTests {
                 "\treturn True"
         val output = cleanPythonCode(input)
 
+        assertEquals(ans, output)
+    }
+
+    @Test
+    fun testCleanPythonCodeRequest() {
+        val input = "def hello():\n\treturn \"hello\""
+        val ans = "def hello():\\n\\treturn \\\"hello\\\""
+
+        val output = cleanPythonCodeRequest(input)
         assertEquals(ans, output)
     }
 }
